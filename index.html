@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Анонимный форум</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header>
+        <h1>Анонимный форум</h1>
+    </header>
+    <main>
+        <section class="post-form">
+            <h2>Создать пост</h2>
+            <form id="postForm">
+                <textarea id="postContent" placeholder="Введите ваш пост..." required></textarea>
+                <button type="submit">Опубликовать</button>
+            </form>
+        </section>
+        <section class="posts">
+            <h2>Все посты</h2>
+            <div id="postsContainer">
+                <!-- Здесь будут отображаться посты -->
+            </div>
+        </section>
+    </main>
+    <script>
+        const postForm = document.getElementById('postForm');
+        const postContent = document.getElementById('postContent');
+        const postsContainer = document.getElementById('postsContainer');
+
+        async function loadPosts() {
+            const response = await fetch('/api/posts');
+            const data = await response.json();
+            postsContainer.innerHTML = '';
+            data.posts.forEach(post => {
+                const postElement = document.createElement('div');
+                postElement.className = 'post';
+                postElement.textContent = post.content;
+                postsContainer.appendChild(postElement);
+            });
+        }
+
+        postForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            const content = postContent.value.trim();
+            if (content) {
+                await fetch('/api/posts', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ content })
+                });
+                postContent.value = '';
+                loadPosts();
+            }
+        });
+
+        document.addEventListener('DOMContentLoaded', loadPosts);
+    </script>
+</body>
+</html>
